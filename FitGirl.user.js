@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FitGirl - Dark-Mode
 // @namespace    Nomicwave
-// @version      1.0
+// @version      1.0.1
 // @description  Dark mode and visual enhancements.
 // @author       Nomicwave
 // @license      MIT License <https://opensource.org/licenses/MIT>

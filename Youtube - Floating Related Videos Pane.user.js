@@ -2,7 +2,7 @@
 // @name         Youtube - Floating Related Videos Pane
 // @namespace    Nomicwave
 // @version      1.0
-// @description  Enables browsing related videos while still being able to watch the currently playing video.
+// @description  Scroll related videos while still watching videos.
 // @author       Nomicwave
 // @match        https://www.youtube.com/watch?*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com

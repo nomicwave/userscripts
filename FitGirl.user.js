@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         FitGirl Dark-Mode
+// @name         FitGirl - Dark-Mode
 // @namespace    Nomicwave
 // @version      1.0
 // @description  Dark mode and visual enhancements.

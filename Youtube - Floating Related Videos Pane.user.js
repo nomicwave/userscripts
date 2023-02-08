@@ -4,6 +4,7 @@
 // @version      1.0
 // @description  Scroll related videos while still watching videos.
 // @author       Nomicwave
+// @license      MIT License <https://opensource.org/licenses/MIT>
 // @match        https://www.youtube.com/watch?*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // @run-at       document-end

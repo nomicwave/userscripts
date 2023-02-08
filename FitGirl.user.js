@@ -4,13 +4,14 @@
 // @version      1.0
 // @description  Dark mode and visual enhancements.
 // @author       Nomicwave
+// @license      MIT License <https://opensource.org/licenses/MIT>
 // @match        https://fitgirl-repacks.site/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=fitgirl-repacks.site
-// @grant        GM_addStyle
 // @run-at       document-start
 // ==/UserScript==
 
-GM_addStyle(`
+(function () {
+    const cssText = `
 	.site {
     	background-color: #000;
     }
@@ -226,5 +227,15 @@ GM_addStyle(`
 
 	.hfeed .entry-content table:last-of-type tr:nth-of-type(1) {
     	background-color: #112011;
+    }`;
+
+    let style = document.createElement('style');
+    style.type = 'text/css';
+    if (style.styleSheet) {
+        style.styleSheet.cssText = cssText;
+    } else {
+        style.appendChild(document.createTextNode(cssText));
     }
-`);
+
+    document.getElementsByTagName('head')[0].appendChild(style);
+})();

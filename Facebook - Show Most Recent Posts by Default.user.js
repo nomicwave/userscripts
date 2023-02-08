@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Facebook - Show Most Recent Posts by Default
 // @namespace    https://greasyfork.org/users/222319
-// @version      1.0.3
+// @version      1.0.4
 // @description  Forces the news feed to show 'most recent' posts by default.
 // @author       Nomicwave <nomicwave@gmail.com>
 // @license      MIT License <https://opensource.org/licenses/MIT>

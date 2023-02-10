@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         FitGirl - Dark-Mode
-// @namespace    Nomicwave
+// @namespace    https://greasyfork.org/users/222319
 // @version      1.0.1
 // @description  Dark mode and visual enhancements.
 // @author       Nomicwave

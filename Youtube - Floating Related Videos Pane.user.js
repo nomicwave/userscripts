@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube - Floating Related Videos Pane
 // @namespace    Nomicwave
-// @version      1.0
+// @version      1.0.1
 // @description  Scroll related videos while still watching videos.
 // @author       Nomicwave
 // @license      MIT License <https://opensource.org/licenses/MIT>
@@ -78,7 +78,7 @@ function loadFloatStyle() {
 function createToggleButton() {
     let div = document.createElement('div');
     div.innerHTML = (`
-    <div class="style-scope ytd-menu-renderer" button-renderer="" style="margin-left: 8px;">
+    <div id="float-state-toggle" class="style-scope ytd-menu-renderer" button-renderer="" style="margin-left: 8px;">
 		<div>
 			<button class="yt-spec-button-shape-next yt-spec-button-shape-next--tonal yt-spec-button-shape-next--mono yt-spec-button-shape-next--size-m yt-spec-button-shape-next--icon-leading " aria-label="Share" style="">
 				<div class="yt-spec-button-shape-next__icon" aria-hidden="true" style="margin-left: 0; margin-right: 0;">
@@ -106,15 +106,16 @@ function createToggleButton() {
     return div.firstChild;
 }
 
-function waitForElement(selector) {
+function waitForElement(selector, exist = true) {
     return new Promise(resolve => {
-        if (document.querySelector(selector)) {
+        if (!!document.querySelector(selector)) {
             return resolve(document.querySelector(selector));
         }
 
         const observer = new MutationObserver(mutations => {
-            if (document.querySelector(selector)) {
-                resolve(document.querySelector(selector));
+            if (!!document.querySelector(selector) === exist) {
+                if (exist) resolve(document.querySelector(selector));
+                else resolve(exist);
                 observer.disconnect();
             }
         });
@@ -141,7 +142,6 @@ function setFloatState(state) {
 }
 
 function floatStateChanged(state) {
-    console.log(dom.playerContainer.childNodes.length)
     if (state === floatState.disabled) {
         observer.disconnect();
         document.body.classList.remove(floatClass.enabled, floatClass.theater);
@@ -169,18 +169,13 @@ const observer = new MutationObserver(async function (e) {
     }
 });
 
-(async function() {
+async function instateToggleButton() {
 
-    dom.playerContainer = await waitForElement('#player-container-inner');
+    console.log('Ok');
+    let clearSignal = await waitForElement('#float-state-toggle', false);
     dom.playerControls = await waitForElement('ytd-app > #content > #page-manager > ytd-watch-flexy > #columns #primary > #primary-inner > #below > ytd-watch-metadata > #above-the-fold > #top-row > #actions > #actions-inner > #menu > ytd-menu-renderer > #top-level-buttons-computed');
-    dom.theaterContainer = await waitForElement('#player-theater-container');
+
     dom.toggle = createToggleButton();
-
-    loadFloatStyle();
-
-    let state = getFloatState();
-    floatStateChanged(state);
-
     dom.toggle.addEventListener('click', function (e) {
         let states = Object.values(floatState);
         let currentState = getFloatState();
@@ -190,6 +185,35 @@ const observer = new MutationObserver(async function (e) {
         setFloatState(nextState);
     });
 
+    let state = getFloatState();
+    floatStateChanged(state);
+
     dom.toggle.getElementsByClassName('frvp-toggle-tooltip')[0].innerText = state;
     dom.playerControls.appendChild(dom.toggle)
+
+    observeUrlChange();
+}
+
+const observeUrlChange = () => {
+    let oldHref = document.location.href;
+    const body = document.querySelector("body");
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(() => {
+            if (oldHref !== document.location.href) {
+                oldHref = document.location.href;
+                instateToggleButton();
+                observer.disconnect();
+            }
+        });
+    });
+    observer.observe(body, { childList: true, subtree: true });
+};
+
+(async function() {
+
+    dom.playerContainer = await waitForElement('#player-container-inner');
+    dom.theaterContainer = await waitForElement('#player-theater-container');
+
+    loadFloatStyle();
+    instateToggleButton();
 })();

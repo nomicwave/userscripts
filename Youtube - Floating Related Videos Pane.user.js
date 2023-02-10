@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Youtube - Floating Related Videos Pane
-// @namespace    Nomicwave
+// @namespace    https://greasyfork.org/users/222319
 // @version      1.0.1
 // @description  Scroll related videos while still watching videos.
 // @author       Nomicwave

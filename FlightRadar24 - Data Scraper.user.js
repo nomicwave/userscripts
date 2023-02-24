@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FlightRadar24 - Data Scraper
 // @namespace    http://tampermonkey.net/
-// @version      1.0.3
+// @version      1.0.4
 // @description  Data scraper!
 // @author       Nomicwave
 // @match        https://www.flightradar24.com/data/aircraft/*
@@ -292,9 +292,9 @@ async function exportToExcel() {
     let flightDateMia = true;
 
     while (flightDateMia) {
-        let result = await fnLoadEarlierFlights(iteration++, pDateFrom)
-        flightHistory = result.concat(flightHistory);
-        ;
+        let result = await fnLoadEarlierFlights(iteration++, pDateFrom) ?? [];
+        flightHistory = flightHistory.concat(result);
+
         let earliestFlight = flightHistory.at(-1);
         let intFlightDate = compileFlightTimestamp(earliestFlight);
 

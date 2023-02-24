@@ -7,7 +7,7 @@
 // @match        https://www.flightradar24.com/data/aircraft/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=flightradar24.com
 // @grant        none
-// @require      https://raw.githubusercontent.com/SheetJS/sheetjs/github/dist/xlsx.full.min.js
+// @require      https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js
 // @run-at       document-end
 // ==/UserScript==
 

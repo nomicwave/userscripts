@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FlightRadar24 - Data Scraper
 // @namespace    http://tampermonkey.net/
-// @version      1.0.2
+// @version      1.0.3
 // @description  Data scraper!
 // @author       Nomicwave
 // @match        https://www.flightradar24.com/data/aircraft/*
@@ -250,7 +250,7 @@ function compileFlightData(list, tStart, tEnd) {
         let flightDate = window.moment.utc(compileFlightTimestamp(item) * 1000).toDate();
         let flightFrom = `${item.airport.origin.position.region.city} (${item.airport.origin.code.iata})`;
         let flightTo = `${item.airport.destination.position.region.city} (${item.airport.destination.code.iata})`;
-        let flightNumber = window.fnIsset(item, 'aircraft', 'model', 'code') ? item.aircraft.model.code : '';
+        let flightNumber = item.identification.number.default;
         let flightDuration = fnFlightDuration(item.time.other.duration);
         let flightSTD = compileFlightTime(item, 'std');
         let flightATD = compileFlightTime(item, 'atd');
@@ -303,7 +303,6 @@ async function exportToExcel() {
     }
 
     flightHistory = compileFlightData(flightHistory, pDateFrom, pDateTo);
-    console.log(flightHistory);
 
     let worksheet = XLSX.utils.json_to_sheet(flightHistory, { cellDates: true, dateNF: 'DD MMM YYYY' });
     let workbook = XLSX.utils.book_new();

@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         FlightRadar24 Data Scraper
+// @name         FlightRadar24 - Data Scraper
 // @namespace    http://tampermonkey.net/
-// @version      1.0.1
+// @version      1.0.2
 // @description  Data scraper!
 // @author       Nomicwave
 // @match        https://www.flightradar24.com/data/aircraft/*

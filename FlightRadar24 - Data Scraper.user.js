@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FlightRadar24 - Data Scraper
 // @namespace    http://tampermonkey.net/
-// @version      1.0.6
+// @version      1.0.7
 // @description  Data scraper!
 // @author       Nomicwave
 // @match        https://www.flightradar24.com/data/aircraft/*
@@ -201,7 +201,6 @@ function compileFlightStatus(item) {
                 break;
 
             case 'diverted':
-                delete status.dataset.timestamp;
                 if (item.airport.real) {
                     status = `Diverted to ${item.airport.real.code.iata}`;
                 } else {

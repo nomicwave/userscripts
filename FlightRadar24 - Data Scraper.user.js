@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         FlightRadar24 - Data Scraper
 // @namespace    http://tampermonkey.net/
-// @version      1.0.4
+// @version      1.0.5
 // @description  Data scraper!
 // @author       Nomicwave
 // @match        https://www.flightradar24.com/data/aircraft/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=flightradar24.com
 // @grant        none
 // @require      https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js
+// @require      https://unpkg.com/jquery@3.6.3/dist/jquery.min.js
 // @run-at       document-end
 // ==/UserScript==
 
@@ -41,13 +42,8 @@ let boolClock12h = parseInt(window.settingsService.syncGetSetting('clock_12h'));
 let boolClockLocal = parseInt(window.settingsService.syncGetSetting('clock_local'));
 let strTimeFormat = (boolClock12h ? 'h:mm A' : 'HH:mm');
 
-function fnLoadEarlierFlights(iteration, strTimestamp, strFetchBy) {
-    const arrRows = document.querySelectorAll('#tbl-datatable tbody tr.data-row');
-    const arrRowsNotData = document.querySelectorAll('#tbl-datatable tbody tr:not(.data-row)');
-
-    const lastPlaybackBtn = document.querySelector('#tbl-datatable tbody tr:last-child.data-row .btn-playback');
-    const lastFlightId = lastPlaybackBtn ? lastPlaybackBtn.dataset.flightHex : null;
-
+function fnLoadEarlierFlights(iteration, strTimestamp, strLastFlightId) {
+    let strFetchBy;
     switch (window.location.pathname.match(/(aircraft|flights|pinned)/gi)[0]) {
         case 'flights':
             strFetchBy = 'flight';
@@ -67,21 +63,27 @@ function fnLoadEarlierFlights(iteration, strTimestamp, strFetchBy) {
         `limit=100`,
         `token=${strToken}`,
         `timestamp=${strTimestamp}`,
-        `olderThenFlightId=${lastFlightId}`
+        `olderThenFlightId=${strLastFlightId}`
         ];
 
-        return fetch(`${window.dispatcher.urls.mobileApi}/common/v1/flight/list.json?` + urlChunks.join('&'), {
-            credentials: 'omit',
-            method: 'GET',
-            mode: 'cors',
-            redirect: 'follow',
-            referrer: window.location.href
-        }).then((objResponse) => objResponse.json()).then((objJson) => {
-            return objJson.result.response.data;
-        }).catch((error) => {
-            console.error(error);
-        });
-    };
+    //     return fetch(`${window.dispatcher.urls.mobileApi}/common/v1/flight/list.json?` + urlChunks.join('&'), {
+    //         credentials: 'omit',
+    //         method: 'GET',
+    //         mode: 'cors',
+    //         redirect: 'follow',
+    //         referrer: window.location.href
+    //     }).then((objResponse) => objResponse.json()).then((objJson) => {
+    //         return objJson.result.response.data;
+    //     }).catch((error) => {
+    //         console.error(error);
+    //     });
+
+    return $.ajax({
+        url: `${window.dispatcher.urls.mobileApi}/common/v1/flight/list.json?` + urlChunks.join('&')
+    }).fail(function(error) {
+        console.error(error);
+    })
+};
 
 function fnFlightDuration(intSeconds) {
     let strResult;
@@ -127,16 +129,16 @@ let styles = `
         #fr24_Download span::before {
             font-size: x-large;
         }
-    `
+    `;
 
-    function captureNetworkRequest(e) {
-        let capture_network_request = [];
-        let capture_resource = performance.getEntriesByType("resource");
-        for (var i = 0; i < capture_resource.length; i++) {
-            capture_network_request.push(capture_resource[i].name);
-        }
-        return capture_network_request;
+function captureNetworkRequest(e) {
+    let capture_network_request = [];
+    let capture_resource = performance.getEntriesByType("resource");
+    for (var i = 0; i < capture_resource.length; i++) {
+        capture_network_request.push(capture_resource[i].name);
     }
+    return capture_network_request;
+}
 
 function constructDownloadBtn() {
     var styleSheet = document.createElement("style")
@@ -248,8 +250,8 @@ function compileFlightData(list, tStart, tEnd) {
 
     filteredList.forEach(function (item, index) {
         let flightDate = window.moment.utc(compileFlightTimestamp(item) * 1000).toDate();
-        let flightFrom = `${item.airport.origin.position.region.city} (${item.airport.origin.code.iata})`;
-        let flightTo = `${item.airport.destination.position.region.city} (${item.airport.destination.code.iata})`;
+        let flightFrom = `${item.airport.origin?.position?.region?.city} (${item.airport.origin?.code?.iata})`;
+        let flightTo = `${item.airport.destination?.position?.region?.city} (${item.airport.destination?.code?.iata})`;
         let flightNumber = item.identification.number.default;
         let flightDuration = fnFlightDuration(item.time.other.duration);
         let flightSTD = compileFlightTime(item, 'std');
@@ -275,6 +277,15 @@ function compileFlightData(list, tStart, tEnd) {
     return data;
 }
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function loadEarlierFlights(iteration, timestamp = '', lastFlightId = '') {
+    let response = await fnLoadEarlierFlights(iteration, timestamp, lastFlightId);
+    return response.result.response.data;
+}
+
 async function exportToExcel() {
     let pDateFrom = getUserDate('Get flight data from date..?', new Date().toLocaleDateString("en-GB"));
     if (pDateFrom === null) return;
@@ -288,17 +299,29 @@ async function exportToExcel() {
     pDateTo = pDateTo.getTime()/1000;
 
     let iteration = 1;
+    let earliestFlight = null;
     let flightHistory = [];
     let flightDateMia = true;
 
     while (flightDateMia) {
-        let result = await fnLoadEarlierFlights(iteration++, pDateFrom) ?? [];
-        flightHistory = flightHistory.concat(result);
+        let timestamp;
+        let lastFlightId;
 
-        let earliestFlight = flightHistory.at(-1);
+        if (earliestFlight) {
+            timestamp = window.moment.utc(compileFlightTimestamp(earliestFlight) * 1000).toDate().getTime()/1000;
+            lastFlightId = earliestFlight.identification.id;
+        }
+
+        let result = await loadEarlierFlights(iteration++, timestamp, lastFlightId);
+        if (!result) break;
+
+        flightHistory = flightHistory.concat(result);
+        earliestFlight = flightHistory.at(-1);
+
         let intFlightDate = compileFlightTimestamp(earliestFlight);
 
-        if (+pDateTo >= +intFlightDate) flightDateMia = false;
+        console.log(pDateTo, intFlightDate);
+        if (pDateTo - 86400 >= intFlightDate) flightDateMia = false; // to date - 1 day epoch
         else continue
     }
 
@@ -313,16 +336,16 @@ async function exportToExcel() {
 
 function autoFitColumns(worksheet) {
     let objectMaxLength = [];
-    const [firstCol, lastCol] = worksheet['!ref']?.replace(/\d/, '').split(':')
-    const numRegexp = new RegExp(/\d+$/g)
+    const [firstCol, lastCol] = worksheet['!ref']?.replace(/\d/, '').split(':');
+    const numRegexp = new RegExp(/\d+$/g);
     const firstColIndex = firstCol.charCodeAt(0),
           lastColIndex = lastCol.charCodeAt(0),
-          rows = +numRegexp.exec(lastCol)[0]
+          rows = +numRegexp.exec(lastCol)[0];
 
     // Loop on columns
     for (let colIndex = firstColIndex; colIndex <= lastColIndex; colIndex++) {
-        const col = String.fromCharCode(colIndex)
-        let maxCellLength = 0
+        const col = String.fromCharCode(colIndex);
+        let maxCellLength = 0;
 
         // Loop on rows
         for (let row = 1; row <= rows; row++) {
@@ -330,11 +353,11 @@ function autoFitColumns(worksheet) {
             if (Object.prototype.toString.call(value) === '[object Date]') {
                 value = window.moment.utc(value).format('DD MMM YYYY');
             }
-            const cellLength = value.length + 1
-            if (cellLength > maxCellLength) maxCellLength = cellLength
+            const cellLength = value?.length + 1 ?? 0;
+            if (cellLength > maxCellLength) maxCellLength = cellLength;
         }
 
-        objectMaxLength.push({ width: maxCellLength })
+        objectMaxLength.push({ width: maxCellLength });
     }
     worksheet['!cols'] = objectMaxLength;
     return worksheet;

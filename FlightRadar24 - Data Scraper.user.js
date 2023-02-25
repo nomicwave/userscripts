@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FlightRadar24 - Data Scraper
 // @namespace    http://tampermonkey.net/
-// @version      1.0.5
+// @version      1.0.6
 // @description  Data scraper!
 // @author       Nomicwave
 // @match        https://www.flightradar24.com/data/aircraft/*
@@ -79,9 +79,10 @@ function fnLoadEarlierFlights(iteration, strTimestamp, strLastFlightId) {
     //     });
 
     return $.ajax({
-        url: `${window.dispatcher.urls.mobileApi}/common/v1/flight/list.json?` + urlChunks.join('&')
-    }).fail(function(error) {
-        console.error(error);
+        url: `${window.dispatcher.urls.mobileApi}/common/v1/flight/list.json?` + urlChunks.join('&'),
+        error: function (req, status, err) {
+            console.log(err);
+        }
     })
 };
 
@@ -282,8 +283,12 @@ function delay(ms) {
 }
 
 async function loadEarlierFlights(iteration, timestamp = '', lastFlightId = '') {
-    let response = await fnLoadEarlierFlights(iteration, timestamp, lastFlightId);
-    return response.result.response.data;
+    try {
+        let response = await fnLoadEarlierFlights(iteration, timestamp, lastFlightId);
+        return response.result.response.data;
+    } catch(error) {
+        return [];
+    }
 }
 
 async function exportToExcel() {
@@ -307,8 +312,12 @@ async function exportToExcel() {
         let timestamp;
         let lastFlightId;
 
+        if (iteration > 1) {
+            await delay(100);
+        }
+
         if (earliestFlight) {
-            timestamp = window.moment.utc(compileFlightTimestamp(earliestFlight) * 1000).toDate().getTime()/1000;
+            timestamp = window.moment.utc(compileFlightTimestamp(earliestFlight) * 1000).toDate().getTime() / 1000;
             lastFlightId = earliestFlight.identification.id;
         }
 
@@ -320,9 +329,15 @@ async function exportToExcel() {
 
         let intFlightDate = compileFlightTimestamp(earliestFlight);
 
-        console.log(pDateTo, intFlightDate);
         if (pDateTo - 86400 >= intFlightDate) flightDateMia = false; // to date - 1 day epoch
+        if (result < 100) flightDateMia = false; // to date - 1 day epoch
+
         else continue
+    }
+
+    if (!flightHistory || flightHistory.length < 1) {
+        alert('Could not extract any data!');
+        return;
     }
 
     flightHistory = compileFlightData(flightHistory, pDateFrom, pDateTo);

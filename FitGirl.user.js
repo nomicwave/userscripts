@@ -231,11 +231,12 @@
 
     let style = document.createElement('style');
     style.type = 'text/css';
+
     if (style.styleSheet) {
         style.styleSheet.cssText = cssText;
     } else {
         style.appendChild(document.createTextNode(cssText));
     }
 
-    document.getElementsByTagName('head')[0].appendChild(style);
+    document.getElementsByTagName('body')[0].appendChild(style);
 })();

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FitGirl - Dark-Mode
 // @namespace    https://greasyfork.org/users/222319
-// @version      1.0.1
+// @version      1.0.2
 // @description  Dark mode and visual enhancements.
 // @author       Nomicwave
 // @license      MIT License <https://opensource.org/licenses/MIT>

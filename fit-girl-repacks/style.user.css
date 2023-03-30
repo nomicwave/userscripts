@@ -405,7 +405,7 @@ article:not(.category-uncategorized) .entry-content ul li img {
     background: none;
 }
 
-.entry-content .status-publish div[style*=paw.png]::before {
+.entry-content div[style*=paw.png]::before {
     position: absolute;
     top: 0;
     width: 100%;

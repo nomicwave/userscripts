@@ -400,9 +400,9 @@ article:not(.category-uncategorized) .entry-content ul li img {
     background-color: #112011;
 }
 
-.entry-content .status-publish div[style*=paw.png] {
+.entry-content div[style*=paw.png] {
     position: relative;
-    background: none;
+    background: none !important;
 }
 
 .entry-content div[style*=paw.png]::before {

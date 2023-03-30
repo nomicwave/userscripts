@@ -399,3 +399,18 @@ article:not(.category-uncategorized) .entry-content ul li img {
 .hfeed .entry-content table:last-of-type tr:nth-of-type(1) {
     background-color: #112011;
 }
+
+.entry-content .status-publish div[style*=paw.png] {
+    position: relative;
+    background: none;
+}
+
+.entry-content .status-publish div[style*=paw.png]::before {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: url("https://fitgirl-repacks.site/wp-content/uploads/2022/08/paw.png") right top no-repeat;
+    filter: invert(100%) saturate(350%) hue-rotate(200deg) brightness(75%) contrast(110%);
+    z-index: 0;
+}

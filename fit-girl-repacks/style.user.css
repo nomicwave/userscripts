@@ -117,8 +117,8 @@ textarea {
 }
 
 article.category-uncategorized>div:last-child>div:last-child {
-    /*background-color: #130014 !important;*/
-    border: 1px solid #f600ff !important;
+    background-color: #130014 !important;
+    /*border: 1px solid #f600ff !important;*/
 }
 
 .wpcu_block_title {

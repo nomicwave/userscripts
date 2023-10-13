@@ -400,7 +400,7 @@ article:not(.category-uncategorized) .entry-content ul li img {
     background-color: #112011;
 }
 
-.entry-content div[style*=paw.png] {
+.entry-content div[style] {
     position: relative;
     background: none !important;
 }

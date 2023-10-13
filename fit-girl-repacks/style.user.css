@@ -117,7 +117,7 @@ textarea {
 }
 
 article.category-uncategorized>div:last-child>div:last-child {
-    background-color: #130014 !important;
+    /*background-color: #130014 !important;*/
     border: 1px solid #f600ff !important;
 }
 
